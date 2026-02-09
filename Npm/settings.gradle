@@ -17,7 +17,8 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'Npm'
+rootProject.name = 'JPM'
+
 
 
 
