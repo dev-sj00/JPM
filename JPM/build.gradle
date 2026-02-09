@@ -8,6 +8,12 @@ plugins {
 group = 'com.github.dev_sj'
 version = '1.0.4'
 
+// Java 8 호환성 명시
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 repositories {
     mavenCentral()
 }
@@ -16,27 +22,19 @@ gradlePlugin {
     plugins {
         jpmPlugin {
             id = 'com.github.dev_sj.jpm'
-            // ⚠️ 여기가 핵심입니다!
-            // 실제 패키지 명을 포함한 전체 경로여야 합니다.
-            // 만약 config 패키지 안의 AppConfig라면 아래와 같이 수정:
-            implementationClass = 'config.AppConfig'
+            // [수정] 실제 MDDLProcessor.java 파일의 전체 경로(패키지 포함)를 적으세요.
+            // 패키지가 없다면 'MDDLProcessor'만 적으시면 됩니다.
+            implementationClass = 'MDDLProcessor'
         }
     }
 }
 
-// JAR 파일에 컴파일된 모든 클래스를 강제로 때려 넣는 설정 추가
-jar {
-    from sourceSets.main.output
-    include "**/*.class"
-}
-
-
 dependencies {
-    // 🔹 MyBatis Core (Mapper 생성용)
     implementation 'org.mybatis:mybatis:3.5.16'
 
-    // 🔹 (선택) MyBatis-Spring — 필요 없으면 빼도 됨
-    // implementation 'org.mybatis.spring:mybatis-spring:3.0.3'
+    // Java 8 호환 AutoService
+    compileOnly 'com.google.auto.service:auto-service:1.0.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
 }
 
 publishing {
