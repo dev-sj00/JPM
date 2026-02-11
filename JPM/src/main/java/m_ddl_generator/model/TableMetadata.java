@@ -1,5 +1,6 @@
 package m_ddl_generator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TableMetadata {
@@ -13,4 +14,20 @@ public class TableMetadata {
     // Getters...
     public String getTableName() { return tableName; }
     public List<ColumnMetadata> getColumns() { return columns; }
+
+    public List<String> getParentNames()
+    {
+
+        List<String> parentTables = new ArrayList<>();
+
+        for(ColumnMetadata col : columns)
+        {
+            if(col.getFkTargetTable() !=null)
+            {
+               parentTables.add(col.getFkTargetTable());
+            }
+        }
+
+        return parentTables;
+    }
 }

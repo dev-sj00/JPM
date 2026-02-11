@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
+import utils.LogPrinter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +13,7 @@ import java.util.*;
 public class MParserUtils {
 
     // 이제 타겟은 오직 하나입니다.
-    private static final String TARGET_TYPE = "MVariable";
+    private static final String TARGET_TYPE = "MField";
 
     public static class Pair {
         public String key;
@@ -61,6 +62,8 @@ public class MParserUtils {
             if (!"builder".equals(methodName) && !"build".equals(methodName)) {
                 String argValue = extractArgValue(methodCall);
                 // 키(메서드명)와 값(인자) 저장
+
+
                 info.add(new Pair(methodName, argValue));
             }
 
@@ -85,7 +88,7 @@ public class MParserUtils {
             return arg.asIntegerLiteralExpr().getValue(); // 100 -> "100"
         }
         else if (arg.isFieldAccessExpr()) {
-            // Enum 처리: ColumnType.STRING -> "STRING" 추출
+             // Enum 처리: ColumnType.STRING -> "STRING" 추출
             return arg.asFieldAccessExpr().getNameAsString();
         }
         else if (arg.isClassExpr()) {

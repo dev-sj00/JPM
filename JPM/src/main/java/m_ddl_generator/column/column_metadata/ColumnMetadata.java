@@ -2,6 +2,7 @@ package m_ddl_generator.column.column_metadata;
 
 import m_ddl_generator.column.enums.ColumnType;
 
+@Deprecated
 public class ColumnMetadata {
     private String name;
     private ColumnType type; // 🔥 핵심! String typeName 대신 이거 사용

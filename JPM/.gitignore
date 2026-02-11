@@ -34,7 +34,8 @@ bin/
 /dist/
 /nbdist/
 /.nb-gradle/
-
+JPM_TEST/
+.idea/
 ### VS Code ###
 .vscode/
 

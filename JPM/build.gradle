@@ -1,14 +1,12 @@
 plugins {
-    id 'java'
     id 'java-library'
     id 'java-gradle-plugin'
     id 'maven-publish'
 }
 
-group = 'com.github.dev_sj'
-version = '1.0.4'
+group = 'com.github.dev_sj.jpm'
+version = '1.0.0' // 필요시 버전 업 (예: 1.0.7)
 
-// Java 8 호환성 명시
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -18,23 +16,36 @@ repositories {
     mavenCentral()
 }
 
+
 gradlePlugin {
     plugins {
         jpmPlugin {
             id = 'com.github.dev_sj.jpm'
-            // [수정] 실제 MDDLProcessor.java 파일의 전체 경로(패키지 포함)를 적으세요.
-            // 패키지가 없다면 'MDDLProcessor'만 적으시면 됩니다.
-            implementationClass = 'MDDLProcessor'
+            implementationClass = 'config.plugin.JpmPlugin'
         }
     }
 }
 
-dependencies {
-    implementation 'org.mybatis:mybatis:3.5.16'
 
-    // Java 8 호환 AutoService
-    compileOnly 'com.google.auto.service:auto-service:1.0.1'
-    annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
+
+// 중복 파일 에러 방지 (JitPack 빌드 필수)
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+
+}
+
+dependencies {
+
+    // Gradle 플러그인 개발 시 필요한 API 포함
+    implementation 'org.mybatis:mybatis:3.5.16'
+    // AutoService 설정
+    compileOnly gradleApi()
+    compileOnly 'com.google.auto.service:auto-service-annotations:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+
+
+
 }
 
 publishing {

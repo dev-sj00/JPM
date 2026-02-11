@@ -1,67 +1,77 @@
 package dsl_variable.v2;
 
-// 패키지 경로 주의 (사용하시는 실제 경로에 맞추세요)
-import dsl_variable.v2.ColumnType;
+public class MField {
 
-public class MVariable {
-
-    // --- 1. 필드 선언 (모두 private final로 불변성 보장) ---
-    private final ColumnType type;
+    // --- 1. 필드 선언 ---
+    private final MFieldType type;
     private final String name;
     private final boolean primaryKey;
     private final boolean autoIncrement;
     private final boolean nullable;
     private final String defaultValue;
-    private final int length; // String용
-    private final String targetClassName; // FK용
-    private final String onDelete; // FK용
+    private final int length;
+    private final String targetClassName;
+    private final String onDelete;
 
-    // --- 2. 생성자 수정 (Builder 값을 this.필드에 할당) ---
-    private MVariable(Builder builder) {
+    // 🔥 [추가] 인덱스 관련 필드
+    private final boolean index;  // 일반 인덱스 여부
+    private final boolean unique; // 유니크 인덱스 여부
+
+    // --- 2. 생성자 ---
+    private MField(Builder builder) {
         this.type = builder.type;
         this.name = builder.name;
         this.primaryKey = builder.primaryKey;
-
-        // 🚨 [버그 수정] 기존 코드에서는 지역 변수에만 담고 사라졌음 -> 멤버 변수에 할당
         this.autoIncrement = builder.autoIncrement;
         this.nullable = builder.nullable;
         this.defaultValue = builder.defaultValue;
         this.length = builder.length;
         this.targetClassName = builder.targetClassName;
         this.onDelete = builder.onDelete;
+
+        // 🔥 [추가] 빌더에서 값 할당
+        this.index = builder.index;
+        this.unique = builder.unique;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    // --- 3. Getter 메서드 구현 (Loader에서 사용함) ---
-    public ColumnType getType() { return type; }
+    // --- 3. Getter 메서드 ---
+    public MFieldType getType() { return type; }
     public String getName() { return name; }
     public boolean isPrimaryKey() { return primaryKey; }
     public boolean isAutoIncrement() { return autoIncrement; }
     public boolean isNullable() { return nullable; }
     public String getDefaultValue() { return defaultValue; }
     public int getLength() { return length; }
-    public String getTargetClassName() { return targetClassName; }
+    public String getParentClassName() { return targetClassName; }
     public String getOnDelete() { return onDelete; }
+
+    // 🔥 [추가] Getter
+    public boolean isIndex() { return index; }
+    public boolean isUnique() { return unique; }
+
 
     // --- Builder Class ---
     public static class Builder {
-        // 필수값은 아니지만 기본값 설정
-        private ColumnType type;
+        private MFieldType type;
         private String name;
 
-        // 기본값 설정 (중요)
         private boolean primaryKey = false;
         private boolean autoIncrement = false;
-        private boolean nullable = true; // 기본적으로 NULL 허용
+        private boolean nullable = true;
         private String defaultValue = null;
-        private int length = 255;        // String 기본 길이
+        private int length = 255;
         private String targetClassName = null;
-        private String onDelete = "NO ACTION";
+        private String onDelete = OnDeleteType.NO_ACTION.getSql();
 
-        public Builder type(ColumnType type) { this.type = type; return this; }
+        // 🔥 [추가] 기본값 false
+        private boolean index = false;
+        private boolean unique = false;
+
+        public Builder type(MFieldType type) { this.type = type; return this; }
         public Builder name(String name) { this.name = name; return this; }
         public Builder primaryKey(boolean val) { this.primaryKey = val; return this; }
         public Builder autoIncrement(boolean val) { this.autoIncrement = val; return this; }
@@ -70,18 +80,32 @@ public class MVariable {
         public Builder length(int val) { this.length = val; return this; }
 
         // FK 관련
-        public Builder target(Class<?> clazz) {
+        public Builder parent(Class<?> clazz) {
             this.targetClassName = clazz.getSimpleName();
             return this;
         }
-        public Builder target(String className) {
+        public Builder parent(String className) {
             this.targetClassName = className;
             return this;
         }
-        public Builder onDelete(String val) { this.onDelete = val; return this; }
+        public Builder onDelete(OnDeleteType onDeleteType) { this.onDelete = onDeleteType.getSql(); return this; }
 
-        public MVariable build() {
-            return new MVariable(this);
+        // 🔥 [추가] 인덱스 설정 메서드
+        public Builder index(boolean val) {
+            this.index = val;
+            return this;
+        }
+
+        // 🔥 [추가] 유니크 설정 메서드
+        public Builder unique(boolean val) {
+            this.unique = val;
+            // 보통 unique면 index 기능도 포함하므로, 명시적으로 index도 true로 해줄 수도 있습니다.
+            // 하지만 DDL 생성기 로직 분리를 위해 여기선 값만 저장합니다.
+            return this;
+        }
+
+        public MField build() {
+            return new MField(this);
         }
     }
 }

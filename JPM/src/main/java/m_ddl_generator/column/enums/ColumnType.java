@@ -1,5 +1,6 @@
 package m_ddl_generator.column.enums;
 
+@Deprecated
 public enum ColumnType {
     INTEGER,
     LONG,
