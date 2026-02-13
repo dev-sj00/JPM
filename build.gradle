@@ -1,0 +1,82 @@
+plugins {
+    id 'java-library'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+
+
+}
+
+group = 'com.github.dev-terace'
+version = property('version')
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+gradlePlugin {
+    plugins {
+        jpmPlugin {
+            id = 'com.github.jpm.plugin'
+            implementationClass = 'config.plugin.JpmPlugin'
+        }
+    }
+}
+
+
+
+// 중복 파일 에러 방지 (JitPack 빌드 필수)
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+
+}
+
+dependencies {
+
+    // Gradle 플러그인 개발 시 필요한 API 포함
+    implementation 'org.mybatis:mybatis:3.5.16'
+    // AutoService 설정
+    compileOnly gradleApi()
+    compileOnly 'com.google.auto.service:auto-service-annotations:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+    implementation 'com.google.auto.service:auto-service:1.1.1'
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.24.10'
+
+
+}
+
+
+
+jar {
+    finalizedBy shadowJar
+}
+
+
+shadowJar {
+    zip64 = true
+    archiveClassifier.set('') // 파일명에 -all 안 붙임 (일반 jar인 척 위장)
+    mergeServiceFiles()       // AutoService 설정 파일 합치기
+
+}
+
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // components.java 대신 shadowJar를 직접 지정하여 강제로 배포
+            artifact shadowJar
+
+            groupId = group
+            artifactId = 'JPM'
+            version = version
+        }
+    }
+}
